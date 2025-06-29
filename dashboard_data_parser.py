@@ -23,7 +23,6 @@ def parse_creds_audits_log(creds_audits_log_file):
 
 # Parser for commands entered during SSH session.
 def parse_cmd_audits_log(cmd_audits_log_file):
-
     data = []
     
     with open(cmd_audits_log_file, 'r') as file:
@@ -40,22 +39,21 @@ def parse_cmd_audits_log(cmd_audits_log_file):
                     data.append({'IP Address': ip, 'Command': command})
     
     df = pd.DataFrame(data) 
-
     return df
 
 # Calculator to generate top 10 values from a dataframe. Supply a column name, counts how often each value occurs, stores in "count" column, then return dataframe with value/count.
 def top_10_calculator(dataframe, column):
+    # Ajout pour éviter l'erreur si le DataFrame est vide ou si la colonne n'existe pas
+    if dataframe.empty or column not in dataframe.columns:
+        return pd.DataFrame(columns=[column, "count"])
 
-    for col in dataframe.columns:
-        if col == column:
-            top_10_df = dataframe[column].value_counts().reset_index().head(10)
-            top_10_df.columns = [column, "count"]
-
+    # Si OK, calculer le top 10
+    top_10_df = dataframe[column].value_counts().reset_index().head(10)
+    top_10_df.columns = [column, "count"]
     return top_10_df
 
 # Takes an IP address as string type, uses the Cleantalk API to look up IP Geolocation.
 def get_country_code(ip):
-
     data_list = []
     # According to the CleanTalk API docs, API calls are rate limited to 1000 per 60 seconds.
     url = f"https://api.cleantalk.org/?method_name=ip_info&ip={ip}"
@@ -79,7 +77,6 @@ def get_country_code(ip):
 
 # Takes a dataframe with the IP addresses, converts each IP address to country geolocation code.
 def ip_to_country_code(dataframe):
-
     data = []
 
     for ip in dataframe['ip_address']:

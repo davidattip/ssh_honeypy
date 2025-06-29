@@ -1,1 +1,26 @@
 
+Client 127.0.0.1 attempted connection with username: test, password: test
+Command b'C\x7f\x7f\x7f\x03e\x7f\x7f\x7f\x7fxit'executed by 127.0.0.1
+Client 127.0.0.1 attempted connection with username: test, password: test2
+Client 127.0.0.1 attempted connection with username: test, password: test 03
+Command b'pwd' executed by 127.0.0.1
+Command b'whoami' executed by 127.0.0.1
+Command b'ls' executed by 127.0.0.1
+Command b'echo test' executed by 127.0.0.1
+Command b'id' executed by 127.0.0.1
+Command b'sudo su' executed by 127.0.0.1
+Client 127.0.0.1 attempted connection with username: test, password: test04
+Command b'id' executed by 127.0.0.1
+Command b'echo' executed by 127.0.0.1
+Command b'sudo su' executed by 127.0.0.1
+Command b'vertigo' executed by 127.0.0.1
+Command b'ipconfig' executed by 127.0.0.1
+Client 127.0.0.1 attempted connection with username: test, password: test05
+Command b'cat /etc/passwd' executed by 127.0.0.1
+Command b'script.sh' executed by 127.0.0.1
+Command b'pwd' executed by 127.0.0.1
+Command b'ls' executed by 127.0.0.1
+Command b'cat script.sh' executed by 127.0.0.1
+Command b'sudo su' executed by 127.0.0.1
+Command b'pas' executed by 127.0.0.1
+Command b'exit' executed by 127.0.0.1
