@@ -5,3 +5,13 @@ assets/images/top10creds.png
 Docker/
 __pycache__
 requirements1.txt
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore venv
+venv/
+
+# Ignore logs
+log_files/
