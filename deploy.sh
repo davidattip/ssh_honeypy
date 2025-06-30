@@ -4,7 +4,7 @@ echo "=== 🚀 HONEYPY AUTO DEPLOY 🚀 ==="
 
 # === CONFIG ===
 REPO_URL="https://github.com/davidattip/ssh_honeypy.git"
-INSTALL_DIR="/opt/honeypy"
+INSTALL_DIR="/opt/ssh_honeypy"
 USERNAME="ubuntu"
 
 echo "[+] Mise à jour et installation des dépendances système..."
