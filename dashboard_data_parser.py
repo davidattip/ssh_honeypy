@@ -2,6 +2,12 @@
 import pandas as pd
 import re
 import requests
+from dotenv import load_dotenv
+import os
+
+# === Charger le .env ===
+load_dotenv()
+HONEYPY_HOST = os.getenv("HONEYPY_HOST", "127.0.0.1")
 
 # === EXISTANT ===
 def parse_creds_audits_log(creds_audits_log_file):
@@ -108,9 +114,6 @@ def parse_malware_audits_log(malware_audits_log_file):
     - Le nom du fichier uploadé
     - La date/heure
     """
-    import pandas as pd
-    import re
-
     data = []
 
     with open(malware_audits_log_file, 'r') as file:

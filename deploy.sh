@@ -50,6 +50,17 @@ else
   echo "[*] Clé SSH déjà existante : $KEY_PATH"
 fi
 
+# === Vérification/Création du fichier .env ===
+ENV_FILE="$INSTALL_DIR/.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "[+] Création du fichier .env par défaut..."
+  echo "HONEYPY_HOST=0.0.0.0" > $ENV_FILE
+  echo "[*] Modifie $ENV_FILE pour mettre ton IP publique si besoin !"
+else
+  echo "[*] Fichier .env déjà présent."
+fi
+
 echo "[+] Création des services systemd..."
 
 # === SSH Honeypot ===
@@ -61,7 +72,8 @@ After=network.target
 [Service]
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/venv/bin/python honeypy.py -a 0.0.0.0 -p 2222 --ssh
+EnvironmentFile=$ENV_FILE
+ExecStart=$INSTALL_DIR/venv/bin/python honeypy.py -a \$HONEYPY_HOST -p 2222 --ssh
 Restart=always
 
 [Install]
@@ -77,6 +89,7 @@ After=network.target
 [Service]
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
+EnvironmentFile=$ENV_FILE
 ExecStart=$INSTALL_DIR/venv/bin/python email_honeypot.py
 Restart=always
 
@@ -93,6 +106,7 @@ After=network.target
 [Service]
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
+EnvironmentFile=$ENV_FILE
 ExecStart=$INSTALL_DIR/venv/bin/python malware_honeypot.py
 Restart=always
 
@@ -109,6 +123,7 @@ After=network.target
 [Service]
 User=$USERNAME
 WorkingDirectory=$INSTALL_DIR
+EnvironmentFile=$ENV_FILE
 ExecStart=$INSTALL_DIR/venv/bin/python web_app.py
 Restart=always
 

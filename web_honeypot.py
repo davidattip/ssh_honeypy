@@ -1,14 +1,22 @@
 # Import library dependencies.
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import logging
 from logging.handlers import RotatingFileHandler
 from dashboard_data_parser import * 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Load .env
+dotenv_path = Path('.env')
+load_dotenv(dotenv_path=dotenv_path)
+
+HONEYPY_HOST = os.getenv("HONEYPY_HOST", "0.0.0.0")
 
 # Logging Format.
 logging_format = logging.Formatter('%(asctime)s %(message)s')
 
-base_dir = base_dir = Path(__file__).parent.parent
+base_dir = Path(__file__).parent.parent
 http_audits_log_local_file_path = base_dir / 'ssh_honeypy' / 'log_files' / 'http_audit.log'
 
 # HTTP Logger.
@@ -23,12 +31,10 @@ def baseline_web_honeypot(input_username="admin", input_password="deeboodah"):
     app = Flask(__name__)
 
     @app.route('/')
-    
     def index():
         return render_template('wp-admin.html')
 
     @app.route('/wp-admin-login', methods=['POST'])
-
     def login():
         username = request.form['username']
         password = request.form['password']
@@ -45,8 +51,6 @@ def baseline_web_honeypot(input_username="admin", input_password="deeboodah"):
     return app
 
 def run_app(port=5000, input_username="admin", input_password="deeboodah"):
-     app = baseline_web_honeypot(input_username, input_password)
-     app.run(debug=True, port=port, host="0.0.0.0")
-
-     return app
-
+    app = baseline_web_honeypot(input_username, input_password)
+    app.run(debug=True, port=port, host=HONEYPY_HOST)
+    return app

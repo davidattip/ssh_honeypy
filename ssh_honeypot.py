@@ -6,6 +6,12 @@ import threading
 import socket
 import time
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Load .env
+load_dotenv()
+HONEYPY_HOST = os.getenv("HONEYPY_HOST", "0.0.0.0")
 
 # Constants.
 SSH_BANNER = "SSH-2.0-MySSHServer_1.0"
@@ -199,10 +205,11 @@ def client_handle(client, addr, username, password, tarpit=False):
 def honeypot(address, port, username, password, tarpit=False):
     socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socks.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    socks.bind((address, port))
+    # Utilise HONEYPY_HOST depuis .env au lieu de l'argument `address`
+    socks.bind((HONEYPY_HOST, port))
 
     socks.listen(100)
-    print(f"SSH server is listening on port {port}.")
+    print(f"SSH server is listening on {HONEYPY_HOST}:{port}.")
 
     while True:
         try:

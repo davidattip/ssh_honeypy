@@ -18,8 +18,11 @@ cmd_audits_log_local_file_path = base_dir / 'ssh_honeypy' / 'log_files' / 'cmd_a
 email_audits_log_local_file_path = base_dir / 'ssh_honeypy' / 'log_files' / 'email_audits.log'
 malware_audits_log_local_file_path = base_dir / 'ssh_honeypy' / 'log_files' / 'malware_audits.log'
 
-dotenv_path = Path('public.env')
+# Load .env
+dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
+
+HONEYPY_HOST = os.getenv("HONEYPY_HOST", "0.0.0.0")
 
 # === LOAD LOG FILES ===
 creds_audits_log_df = parse_creds_audits_log(creds_audits_log_local_file_path)
@@ -182,4 +185,4 @@ app.layout = dbc.Container([
 ])
 
 if __name__ == '__main__':
-    app.run(debug=True, host="127.0.0.1")
+    app.run(debug=True, host=HONEYPY_HOST)

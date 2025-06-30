@@ -1,13 +1,19 @@
 # Import libraries
 import asyncio
+import os
 from aiosmtpd.controller import Controller
 from aiosmtpd.handlers import Message
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from dotenv import load_dotenv
+
+# === Load environment variables ===
+base_dir = Path(__file__).parent.parent
+load_dotenv(dotenv_path=base_dir / '.env')
+HONEYPY_HOST = os.getenv('HONEYPY_HOST', '127.0.0.1')  # fallback localhost
 
 # === Logging configuration ===
-base_dir = Path(__file__).parent.parent
 log_file = base_dir / 'ssh_honeypy' / 'log_files' / 'email_audits.log'
 
 logger = logging.getLogger('EmailHoneypot')
@@ -45,8 +51,8 @@ class HoneypotHandler:
 # === Main function ===
 if __name__ == "__main__":
     handler = HoneypotHandler()
-    controller = Controller(handler, hostname='127.0.0.1', port=2525)
-    print("[+] Email honeypot running on port 2525...")
+    controller = Controller(handler, hostname=HONEYPY_HOST, port=2525)
+    print(f"[+] Email honeypot running on {HONEYPY_HOST}:2525 ...")
     controller.start()
 
     try:

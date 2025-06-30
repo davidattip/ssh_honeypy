@@ -1,34 +1,42 @@
 # Import library dependencies.
 import argparse
-# Import project python file dependencies. This is the main file to interface with the honeypot with.
+import os
+from dotenv import load_dotenv
+
+# Import project python file dependencies.
 from ssh_honeypot import *
 from web_honeypot import *
 from dashboard_data_parser import *
 from web_app import *
 
+# === Load .env ===
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(dotenv_path=os.path.join(base_dir, '.env'))
+HONEYPY_HOST = os.getenv('HONEYPY_HOST', '127.0.0.1')
+
 if __name__ == "__main__":
     # Create parser and add arguments.
-    parser = argparse.ArgumentParser() 
-    parser.add_argument('-a','--address', type=str, required=True)
-    parser.add_argument('-p','--port', type=int, required=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a', '--address', type=str, help='Honeypot listen address')
+    parser.add_argument('-p', '--port', type=int, required=True)
     parser.add_argument('-u', '--username', type=str)
     parser.add_argument('-w', '--password', type=str)
     parser.add_argument('-s', '--ssh', action="store_true")
     parser.add_argument('-t', '--tarpit', action="store_true")
     parser.add_argument('-wh', '--http', action="store_true")
-    
+
     args = parser.parse_args()
-    
-    # Parse the arguments based on user-supplied argument.
+
+    # Use .env if no address is given
+    bind_address = args.address if args.address else HONEYPY_HOST
+
     try:
         if args.ssh:
             print("[-] Running SSH Honeypot...")
-            honeypot(args.address, args.port, args.username, args.password, args.tarpit)
+            honeypot(bind_address, args.port, args.username, args.password, args.tarpit)
 
         elif args.http:
             print('[-] Running HTTP Wordpress Honeypot...')
-            #if args.nocountry:
-                #pass_country_status(True)
             if not args.username:
                 args.username = "admin"
                 print("[-] Running with default username of admin...")
@@ -38,6 +46,6 @@ if __name__ == "__main__":
             print(f"Port: {args.port} Username: {args.username} Password: {args.password}")
             run_app(args.port, args.username, args.password)
         else:
-            print("[!] You can only choose SSH (-s) (-ssh) or HTTP (-h) (-http) when running script.")
+            print("[!] You must choose SSH (-s) or HTTP (-wh) when running this script.")
     except KeyboardInterrupt:
         print("\nProgram exited.")
