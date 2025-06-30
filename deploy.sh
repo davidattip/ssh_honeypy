@@ -9,9 +9,9 @@ USERNAME="ubuntu"
 
 echo "[+] Mise à jour et installation des dépendances système..."
 sudo apt update
-sudo apt install -y python3-venv python3-pip git
+sudo apt install -y python3-venv python3-pip git openssh-client
 
-echo "[+] Clonage du repo..."
+echo "[+] Clonage/Mise à jour du repo..."
 sudo mkdir -p $INSTALL_DIR
 sudo chown $USERNAME:$USERNAME $INSTALL_DIR
 
@@ -28,12 +28,27 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# Assurer que aiosmtpd est installé pour le honeypot email
+pip install aiosmtpd
+grep -qxF 'aiosmtpd' requirements.txt || echo 'aiosmtpd' >> requirements.txt
+
 echo "[+] Vérification/création des fichiers de logs..."
 mkdir -p $INSTALL_DIR/ssh_honeypy/log_files
 touch $INSTALL_DIR/ssh_honeypy/log_files/creds_audits.log
 touch $INSTALL_DIR/ssh_honeypy/log_files/cmd_audits.log
 touch $INSTALL_DIR/ssh_honeypy/log_files/email_audits.log
 touch $INSTALL_DIR/ssh_honeypy/log_files/malware_audits.log
+
+echo "[+] Vérification/génération de la clé RSA pour SSH Honeypot..."
+KEY_PATH="$INSTALL_DIR/static/server.key"
+mkdir -p $INSTALL_DIR/static
+
+if [ ! -f "$KEY_PATH" ]; then
+  echo "[*] Génération de la clé SSH server.key..."
+  ssh-keygen -t rsa -b 2048 -f "$KEY_PATH" -N ""
+else
+  echo "[*] Clé SSH déjà existante : $KEY_PATH"
+fi
 
 echo "[+] Création des services systemd..."
 
