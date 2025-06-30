@@ -169,3 +169,6 @@ EOF
 
 sudo systemctl enable web_honeypy
 sudo systemctl restart web_honeypy
+
+sudo chown -R ubuntu:ubuntu $INSTALL_DIR/ssh_honeypy/log_files
+sudo chmod -R 755 $INSTALL_DIR/ssh_honeypy/log_files
