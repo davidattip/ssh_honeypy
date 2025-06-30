@@ -28,20 +28,24 @@ cmd_audits_log_local_file_path = base_dir / 'ssh_honeypy' / 'log_files' / 'cmd_a
 # SSH Server Host Key.
 host_key = paramiko.RSAKey(filename=server_key)
 
-# Logging Format.
-logging_format = logging.Formatter('%(message)s')
+# === LOGGING CORRECT ===
+logging_format = logging.Formatter('%(asctime)s %(message)s')
 
-# Funnel (catch all) Logger.
+# Funnel (command) Logger.
 funnel_logger = logging.getLogger('FunnelLogger')
+if funnel_logger.hasHandlers():
+    funnel_logger.handlers.clear()
 funnel_logger.setLevel(logging.INFO)
-funnel_handler = RotatingFileHandler(cmd_audits_log_local_file_path, maxBytes=2000, backupCount=5)
+funnel_handler = RotatingFileHandler(cmd_audits_log_local_file_path, maxBytes=5000000, backupCount=5)
 funnel_handler.setFormatter(logging_format)
 funnel_logger.addHandler(funnel_handler)
 
-# Credentials Logger. Captures IP Address, Username, Password.
+# Credentials Logger.
 creds_logger = logging.getLogger('CredsLogger')
+if creds_logger.hasHandlers():
+    creds_logger.handlers.clear()
 creds_logger.setLevel(logging.INFO)
-creds_handler = RotatingFileHandler(creds_audits_log_local_file_path, maxBytes=2000, backupCount=5)
+creds_handler = RotatingFileHandler(creds_audits_log_local_file_path, maxBytes=5000000, backupCount=5)
 creds_handler.setFormatter(logging_format)
 creds_logger.addHandler(creds_handler)
 
@@ -63,8 +67,10 @@ class Server(paramiko.ServerInterface):
         return "password"
 
     def check_auth_password(self, username, password):
-        funnel_logger.info(f'Client {self.client_ip} attempted connection with username: {username}, password: {password}')
         creds_logger.info(f'{self.client_ip}, {username}, {password}')
+        creds_logger.handlers[0].flush()
+        funnel_logger.info(f'Client {self.client_ip} attempted connection with username: {username}, password: {password}')
+        funnel_logger.handlers[0].flush()
         if self.input_username is not None and self.input_password is not None:
             if username == self.input_username and password == self.input_password:
                 return paramiko.AUTH_SUCCESSFUL
@@ -81,7 +87,6 @@ class Server(paramiko.ServerInterface):
         return True
 
     def check_channel_exec_request(self, channel, command):
-        command = str(command)
         return True
 
 
@@ -94,6 +99,7 @@ def emulated_shell(channel, client_ip):
         channel.send(char)
         if not char:
             channel.close()
+            break
 
         command += char
 
@@ -104,6 +110,7 @@ def emulated_shell(channel, client_ip):
                 response = b"\n Goodbye!\n"
                 channel.send(response)
                 channel.close()
+                break
 
             elif cmd == b'pwd':
                 response = b"\n/home/ubuntu\r\n"
@@ -154,6 +161,8 @@ def emulated_shell(channel, client_ip):
                 response = b"\n" + cmd + b": command not found\r\n"
 
             funnel_logger.info(f'Command {cmd} executed by {client_ip}')
+            funnel_logger.handlers[0].flush()
+
             channel.send(response)
             channel.send(PROMPT)
             command = b""
@@ -174,6 +183,7 @@ def client_handle(client, addr, username, password, tarpit=False):
 
         if channel is None:
             print("No channel was opened.")
+            return
 
         standard_banner = "Welcome to Ubuntu 22.04 LTS (Jammy Jellyfish)!\r\n\r\n"
 
@@ -192,7 +202,6 @@ def client_handle(client, addr, username, password, tarpit=False):
             print(error)
     except Exception as error:
         print(error)
-        print("!!! Exception !!!")
     finally:
         try:
             transport.close()
@@ -205,7 +214,6 @@ def client_handle(client, addr, username, password, tarpit=False):
 def honeypot(address, port, username, password, tarpit=False):
     socks = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socks.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # Utilise HONEYPY_HOST depuis .env au lieu de l'argument `address`
     socks.bind((HONEYPY_HOST, port))
 
     socks.listen(100)
