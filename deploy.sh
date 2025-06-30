@@ -149,3 +149,23 @@ sudo systemctl restart honeypy_dashboard
 echo "✅ DEPLOY TERMINÉ AVEC SUCCÈS !"
 echo "➡️ VPS: vps-e67e2d48.vps.ovh.net (193.70.0.151)"
 echo "➡️ Services actifs et persistants."
+
+# === Web Honeypot ===
+cat <<EOF | sudo tee /etc/systemd/system/web_honeypy.service
+[Unit]
+Description=Web Honeypot (WordPress Fake Login)
+After=network.target
+
+[Service]
+User=$USERNAME
+WorkingDirectory=$INSTALL_DIR
+EnvironmentFile=$INSTALL_DIR/.env
+ExecStart=$INSTALL_DIR/venv/bin/python honeypy.py -a \$HONEYPY_HOST -p 5000 --http
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable web_honeypy
+sudo systemctl restart web_honeypy
